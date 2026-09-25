@@ -46,39 +46,39 @@ export const TimeBasedHero: React.FC<TimeBasedHeroProps> = ({ stops, interstitia
       icon: <Sunrise className="w-5 h-5 text-amber-600" />,
       greeting: 'Good Morning',
       malayalamGreeting: 'സുപ്രഭാതം',
-      subtitle: 'Where are you heading today around Thiruvilwamala village?',
-      badge: 'Morning Dew over Nila River • 26°C',
-      tagColor: 'bg-blue-600 text-white',
+      subtitle: 'Sunrise rays over river fields & morning bus connections.',
+      badge: 'Golden Sunrise over Nila River Fields • 26°C',
+      spanColor: 'text-amber-600',
       isDark: false
     },
     afternoon: {
       bgClass: 'hero-afternoon',
-      icon: <Sun className="w-5 h-5 text-yellow-600" />,
+      icon: <Sun className="w-5 h-5 text-amber-500 animate-spin" style={{ animationDuration: '16s' }} />,
       greeting: 'Good Afternoon',
       malayalamGreeting: 'ഉച്ച നമസ്കാരം',
-      subtitle: 'Check sunlit daytime bus schedules, local town connects & routes.',
-      badge: 'Vibrant Village Palms • 31°C',
-      tagColor: 'bg-blue-600 text-white',
+      subtitle: 'High noon sun at peak. Check daytime bus timetables & routes.',
+      badge: 'Midday Sun at Peak over Village Palms • 32°C',
+      spanColor: 'text-blue-600',
       isDark: false
     },
     evening: {
       bgClass: 'hero-evening',
-      icon: <Sunset className="w-5 h-5 text-orange-600" />,
+      icon: <Sunset className="w-5 h-5 text-amber-400" />,
       greeting: 'Good Evening',
       malayalamGreeting: 'സന്ധ്യാവന്ദനം',
-      subtitle: 'Find your twilight return bus to Thiruvilwamala & nearby towns.',
-      badge: 'Golden Hour Dusk over Riverbank • 28°C',
-      tagColor: 'bg-amber-600 text-white',
-      isDark: false
+      subtitle: 'Fiery sunset on horizon. Find your dusk return bus home.',
+      badge: 'Fiery Sunset Glow on Horizon • 28°C',
+      spanColor: 'text-amber-300',
+      isDark: true
     },
     night: {
       bgClass: 'hero-night',
       icon: <Moon className="w-5 h-5 text-indigo-300" />,
       greeting: 'Good Night',
       malayalamGreeting: 'ശുഭരാത്രി',
-      subtitle: 'Plan tomorrow’s travel schedule and early morning village trips.',
-      badge: 'Peaceful Countryside Night • 24°C',
-      tagColor: 'bg-indigo-600 text-white',
+      subtitle: 'Starry night sky. Plan tomorrow’s travel & early morning trips.',
+      badge: 'Starry Night & Peaceful Moonlit Countryside • 24°C',
+      spanColor: 'text-indigo-300',
       isDark: true
     }
   }[period];
@@ -118,7 +118,7 @@ export const TimeBasedHero: React.FC<TimeBasedHeroProps> = ({ stops, interstitia
           <div className="space-y-2">
             <h1 className={`text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight ${atmosphere.isDark ? 'text-white' : 'text-slate-900'}`}>
               {atmosphere.greeting},{' '}
-              <span className="text-blue-600 block font-serif italic font-normal">
+              <span className={`${atmosphere.spanColor} block font-serif italic font-normal`}>
                 {atmosphere.malayalamGreeting}
               </span>
             </h1>

@@ -43,28 +43,28 @@ html, body {
 
 /* AUTHENTIC KERALA VILLAGE TIME-BASED ATMOSPHERIC BACKGROUNDS */
 .hero-morning {
-  background: linear-gradient(135deg, rgba(239, 246, 255, 0.88) 0%, rgba(219, 234, 254, 0.85) 50%, rgba(224, 242, 254, 0.92) 100%),
-              url('https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=1600&auto=format&fit=crop');
+  background: linear-gradient(135deg, rgba(255, 247, 237, 0.65) 0%, rgba(254, 240, 138, 0.4) 40%, rgba(219, 234, 254, 0.65) 100%),
+              url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1600&auto=format&fit=crop');
   background-size: cover;
   background-position: center;
 }
 
 .hero-afternoon {
-  background: linear-gradient(135deg, rgba(240, 249, 255, 0.88) 0%, rgba(224, 242, 254, 0.85) 50%, rgba(186, 230, 253, 0.92) 100%),
-              url('https://images.unsplash.com/photo-1593693397690-362cb9666fc2?q=80&w=1600&auto=format&fit=crop');
+  background: linear-gradient(135deg, rgba(224, 242, 254, 0.6) 0%, rgba(186, 230, 253, 0.45) 50%, rgba(147, 197, 253, 0.6) 100%),
+              url('https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=1600&auto=format&fit=crop');
   background-size: cover;
   background-position: center;
 }
 
 .hero-evening {
-  background: linear-gradient(135deg, rgba(255, 247, 237, 0.88) 0%, rgba(254, 215, 170, 0.85) 50%, rgba(253, 186, 116, 0.92) 100%),
-              url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1600&auto=format&fit=crop');
+  background: linear-gradient(135deg, rgba(124, 45, 18, 0.6) 0%, rgba(194, 65, 12, 0.45) 50%, rgba(249, 115, 22, 0.55) 100%),
+              url('https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1600&auto=format&fit=crop');
   background-size: cover;
   background-position: center;
 }
 
 .hero-night {
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.92) 0%, rgba(30, 41, 59, 0.88) 100%),
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 27, 75, 0.75) 50%, rgba(15, 23, 42, 0.85) 100%),
               url('https://images.unsplash.com/photo-1509718443690-d8e2fb3474b7?q=80&w=1600&auto=format&fit=crop');
   background-size: cover;
   background-position: center;
