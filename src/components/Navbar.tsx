@@ -15,14 +15,6 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTimePeriod, onTimePeriodC
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
-      {/* Top micro announcement bar */}
-      <div className="bg-blue-900 border-b border-blue-800 px-4 py-1 text-xs text-blue-100 text-center flex items-center justify-center gap-2 font-medium">
-        <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-        <span>Thiruvilwamala Official Local Portal &amp; Transit Timetables</span>
-        <span className="hidden md:inline bg-blue-800 text-blue-200 px-2 py-0.5 rounded text-[10px] border border-blue-700 font-mono">
-          Thrissur, Kerala
-        </span>
-      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
