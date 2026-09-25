@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Stop {
+  id          String   @id @default(uuid())
+  name        String
+  code        String   @unique
+  district    String   @default("Thrissur")
+  isMajor     Boolean  @default(false)
+  latitude    Float?
+  longitude   Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  routeStops  RouteStop[]
+}
+
+model Bus {
+  id             String   @id @default(uuid())
+  name           String
+  busNumber      String?
+  operator       String   
+  busType        String   
+  operatingDays  String   @default("Daily")
+  isDirect       Boolean  @default(false)
+  phone          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  timetables     Timetable[]
+}
+
+model Route {
+  id             String   @id @default(uuid())
+  name           String   
+  originName     String   
+  destName       String   
+  viaText        String   
+  approxDuration Int      
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  stops          RouteStop[]
+  timetables     Timetable[]
+}
+
+model RouteStop {
+  id          String   @id @default(uuid())
+  routeId     String
+  stopId      String
+  stopOrder   Int
+  offsetMins  Int      @default(0) 
+
+  route       Route    @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  stop        Stop     @relation(fields: [stopId], references: [id], onDelete: Cascade)
+
+  @@unique([routeId, stopId])
+}
+
+model Timetable {
+  id             String   @id @default(uuid())
+  busId          String
+  routeId        String
+  departureTime  String   
+  arrivalTime    String   
+  direction      String   @default("OUTBOUND") 
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  bus            Bus      @relation(fields: [busId], references: [id], onDelete: Cascade)
+  route          Route    @relation(fields: [routeId], references: [id], onDelete: Cascade)
+}
+
+model Advertisement {
+  id               String   @id @default(uuid())
+  advertiserName   String
+  title            String
+  description      String
+  image            String
+  mediaType        String   @default("image") 
+  videoUrl         String?
+  targetUrl        String
+  placement        String   
+  adFormat         String   @default("card") 
+  adTheme          String   @default("blue") // "blue", "emerald", "amber", "purple", "dark"
+  ctaText          String   @default("Visit Store")
+  priority         Int      @default(1)
+  displaySeconds   Int      @default(15) // Total ad display duration
+  skipAfterSeconds Int      @default(5)  // compulsory view duration before close button unlocks
+  startDate        DateTime
+  endDate          DateTime
+  isActive         Boolean  @default(true)
+  impressions      Int      @default(0)
+  clicks           Int      @default(0)
+  badgeText        String?  @default("Local Partner")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
