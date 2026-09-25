@@ -41,21 +41,33 @@ html, body {
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
 }
 
-/* Time period atmospheres - Light & Crisp White/Blue Gradients */
+/* AUTHENTIC KERALA VILLAGE TIME-BASED ATMOSPHERIC BACKGROUNDS */
 .hero-morning {
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 50%, #e0f2fe 100%);
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.88) 0%, rgba(219, 234, 254, 0.85) 50%, rgba(224, 242, 254, 0.92) 100%),
+              url('https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=1600&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
 }
 
 .hero-afternoon {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%);
+  background: linear-gradient(135deg, rgba(240, 249, 255, 0.88) 0%, rgba(224, 242, 254, 0.85) 50%, rgba(186, 230, 253, 0.92) 100%),
+              url('https://images.unsplash.com/photo-1593693397690-362cb9666fc2?q=80&w=1600&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
 }
 
 .hero-evening {
-  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%);
+  background: linear-gradient(135deg, rgba(255, 247, 237, 0.88) 0%, rgba(254, 215, 170, 0.85) 50%, rgba(253, 186, 116, 0.92) 100%),
+              url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1600&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
 }
 
 .hero-night {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.92) 0%, rgba(30, 41, 59, 0.88) 100%),
+              url('https://images.unsplash.com/photo-1509718443690-d8e2fb3474b7?q=80&w=1600&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
   color: #f8fafc;
 }
 
