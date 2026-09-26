@@ -152,7 +152,7 @@ export const RotatingAdBanner: React.FC<RotatingAdBannerProps> = ({
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
               sizes="300px"
-              unoptimized={currentAd.image?.startsWith('data:')}
+              unoptimized={true}
             />
           )}
 

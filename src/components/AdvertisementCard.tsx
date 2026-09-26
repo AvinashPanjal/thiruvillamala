@@ -92,11 +92,12 @@ export const AdvertisementCard: React.FC<AdvertisementCardProps> = ({ ad, compac
       <div className={`grid ${compact ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-12'} gap-4 items-center`}>
         <div className={`${compact ? 'w-full h-36' : 'md:col-span-4 h-36 md:h-28'} relative rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0`}>
           <Image
-            src={ad.image}
-            alt={ad.title}
+            src={ad.image || 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=800&auto=format&fit=crop'}
+            alt={ad.title || 'Ad'}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"
             sizes="(max-width: 768px) 100vw, 300px"
+            unoptimized={true}
           />
         </div>
 
