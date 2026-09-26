@@ -138,7 +138,7 @@ export const RotatingAdBanner: React.FC<RotatingAdBannerProps> = ({
           {currentAd.mediaType === 'video' && currentAd.videoUrl ? (
             <video
               src={currentAd.videoUrl}
-              poster={currentAd.image}
+              poster={currentAd.image || 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=800&auto=format&fit=crop'}
               autoPlay
               muted
               loop
@@ -147,11 +147,12 @@ export const RotatingAdBanner: React.FC<RotatingAdBannerProps> = ({
             />
           ) : (
             <Image
-              src={currentAd.image}
-              alt={currentAd.title}
+              src={currentAd.image || 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=800&auto=format&fit=crop'}
+              alt={currentAd.title || 'Advertisement'}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
               sizes="300px"
+              unoptimized={currentAd.image?.startsWith('data:')}
             />
           )}
 

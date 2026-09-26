@@ -163,6 +163,7 @@ export const SearchLoadingModal: React.FC<SearchLoadingModalProps> = ({
               className="object-cover sm:object-contain"
               priority
               sizes="100vw"
+              unoptimized={ad?.image?.startsWith('data:')}
             />
           </div>
         )}

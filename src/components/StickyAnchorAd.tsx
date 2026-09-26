@@ -76,7 +76,7 @@ export const StickyAnchorAd: React.FC<StickyAnchorAdProps> = ({ ad, ads = [] }) 
             {currentAd.mediaType === 'video' && currentAd.videoUrl ? (
               <video
                 src={currentAd.videoUrl}
-                poster={currentAd.image}
+                poster={currentAd.image || 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=800&auto=format&fit=crop'}
                 autoPlay
                 muted
                 loop
@@ -85,11 +85,12 @@ export const StickyAnchorAd: React.FC<StickyAnchorAdProps> = ({ ad, ads = [] }) 
               />
             ) : (
               <Image
-                src={currentAd.image}
-                alt={currentAd.title}
+                src={currentAd.image || 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=800&auto=format&fit=crop'}
+                alt={currentAd.title || 'Ad'}
                 fill
                 className="object-cover"
                 sizes="60px"
+                unoptimized={currentAd.image?.startsWith('data:')}
               />
             )}
           </div>
