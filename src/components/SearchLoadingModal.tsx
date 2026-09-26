@@ -83,7 +83,7 @@ export const SearchLoadingModal: React.FC<SearchLoadingModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] w-full max-w-full h-[100dvh] bg-[#141414] text-white flex flex-col justify-between overflow-hidden select-none animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[9999] w-full max-w-full h-[100dvh] bg-[#141414] text-white flex flex-col justify-between overflow-hidden select-none animate-slide-up">
       
       {/* 1. TOP HEADER BAR - HIGH CONTRAST & FULLY VISIBLE TIMER / CLOSE BUTTON */}
       <div className="w-full bg-[#1e1e1e] border-b border-[#333333] px-3 sm:px-6 py-3 flex items-center justify-between z-30 shrink-0">

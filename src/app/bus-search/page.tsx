@@ -48,15 +48,13 @@ export default async function BusSearchPage({ searchParams }: BusSearchPageProps
   });
 
   const searchAds = await getAds('search_results');
-  const searchAd = searchAds[0] || null;
-
   const nativeAds = await getAds('native_in_feed');
-  const nativeAd = nativeAds[0] || searchAd;
-
+  const homepageAds = await getAds('homepage');
   const anchorAds = await getAds('sticky_anchor');
-  const stickyAnchorAd = anchorAds[0] || searchAd;
-
   const interstitialAds = await getAds('interstitial_loading');
+
+  const allInPageAds = [...searchAds, ...nativeAds, ...homepageAds, ...anchorAds].filter(a => a && a.isActive);
+  const searchAd = searchAds[0] || allInPageAds[0] || null;
   const interstitialAd = interstitialAds[0] || null;
 
   return (
@@ -86,10 +84,10 @@ export default async function BusSearchPage({ searchParams }: BusSearchPageProps
           />
         </div>
 
-        {/* Search Header Banner */}
-        {searchAd && (
+        {/* Search Header Banner - Prioritized Auto-Rotating In-Page Ad */}
+        {allInPageAds.length > 0 && (
           <div className="mb-6">
-            <AdvertisementCard ad={searchAd} />
+            <AdSenseNativeUnit ads={allInPageAds} />
           </div>
         )}
 
@@ -171,9 +169,9 @@ export default async function BusSearchPage({ searchParams }: BusSearchPageProps
             {buses.map((bus, idx) => (
               <React.Fragment key={bus.id}>
                 <BusCard bus={bus} />
-                {/* Insert Native AdSense In-Feed Ad after 2nd item */}
-                {idx === 1 && nativeAd && (
-                  <AdSenseNativeUnit ad={nativeAd} />
+                {/* Insert Native AdSense In-Feed Rotating Ad after 2nd item */}
+                {idx === 1 && allInPageAds.length > 0 && (
+                  <AdSenseNativeUnit ads={allInPageAds} />
                 )}
               </React.Fragment>
             ))}
@@ -182,7 +180,7 @@ export default async function BusSearchPage({ searchParams }: BusSearchPageProps
       </main>
 
       {/* Google AdSense Style Sticky Bottom Anchor Banner */}
-      <StickyAnchorAd ad={stickyAnchorAd} />
+      <StickyAnchorAd ads={allInPageAds} />
 
       <Footer />
     </div>

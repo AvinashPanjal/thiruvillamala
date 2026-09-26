@@ -22,6 +22,8 @@ import {
   Timer,
   Lock,
   Video,
+  Upload,
+  RefreshCw,
   Image as ImageIcon
 } from 'lucide-react';
 import {
@@ -54,8 +56,9 @@ export default function AdminDashboardPage() {
   const [showAdModal, setShowAdModal] = useState(false);
   const [showBusModal, setShowBusModal] = useState(false);
   const [showTimetableModal, setShowTimetableModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
-  // New Ad Form State with Full Admin Timing & Video Control
+  // New Ad Form State with Full Admin Timing, File Upload & Rotation Control
   const [adForm, setAdForm] = useState({
     advertiserName: '',
     title: '',
@@ -68,6 +71,7 @@ export default function AdminDashboardPage() {
     adFormat: 'interstitial_loading' as any,
     displaySeconds: 8,
     skipAfterSeconds: 5,
+    rotationIntervalSeconds: 5,
     startDate: '2026-01-01',
     endDate: '2026-12-31',
     isActive: true,
@@ -132,12 +136,43 @@ export default function AdminDashboardPage() {
       adFormat: 'interstitial_loading',
       displaySeconds: 8,
       skipAfterSeconds: 5,
+      rotationIntervalSeconds: 5,
       startDate: '2026-01-01',
       endDate: '2026-12-31',
       isActive: true,
       badgeText: 'Featured Local Merchant'
     });
     await loadData();
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch('/api/admin/upload-ad', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.url) {
+        setAdForm((prev) => ({
+          ...prev,
+          image: data.url,
+          videoUrl: prev.mediaType === 'video' ? data.url : prev.videoUrl
+        }));
+      } else {
+        alert(data.error || 'Upload failed');
+      }
+    } catch (err: any) {
+      alert('Upload error: ' + (err.message || 'Failed'));
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleToggleAdStatus = async (id: string, currentStatus: boolean) => {
@@ -700,18 +735,34 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-slate-400 font-bold mb-1">
-                  {adForm.mediaType === 'video' ? 'Video (.mp4) URL' : 'Poster Image URL'}
+              <div className="space-y-1.5">
+                <label className="block text-slate-300 font-bold text-xs flex items-center justify-between">
+                  <span>{adForm.mediaType === 'video' ? 'Video (.mp4) File or URL' : 'Poster Image File or URL'}</span>
+                  <span className="text-[10px] text-blue-400 font-mono">Upload file or enter URL</span>
                 </label>
-                <input
-                  type="url"
-                  required
-                  value={adForm.image}
-                  onChange={(e) => setAdForm({ ...adForm, image: e.target.value })}
-                  placeholder="https://images.unsplash.com/..."
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white font-medium"
-                />
+                
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <label className="cursor-pointer px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-extrabold text-xs flex items-center justify-center gap-2 transition-all shadow-md shrink-0">
+                    <Upload className="w-4 h-4" />
+                    <span>{uploading ? 'Uploading File...' : '📁 Upload File from Device'}</span>
+                    <input
+                      type="file"
+                      accept={adForm.mediaType === 'video' ? 'video/*' : 'image/*'}
+                      onChange={handleFileUpload}
+                      disabled={uploading}
+                      className="hidden"
+                    />
+                  </label>
+
+                  <input
+                    type="url"
+                    required
+                    value={adForm.image}
+                    onChange={(e) => setAdForm({ ...adForm, image: e.target.value })}
+                    placeholder="Or enter media URL (https://...)"
+                    className="flex-1 bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white font-mono"
+                  />
+                </div>
               </div>
 
               <div>
@@ -727,36 +778,53 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* TIMING CONTROLS */}
-              <div className="grid grid-cols-2 gap-2 bg-slate-950 p-3 rounded-2xl border border-slate-800">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-slate-950 p-3 rounded-2xl border border-slate-800">
                 <div>
-                  <label className="block text-amber-400 font-bold mb-1 flex items-center gap-1">
+                  <label className="block text-amber-400 font-bold mb-1 text-xs flex items-center gap-1">
                     <Lock className="w-3 h-3" /> Skip Lock Timer
                   </label>
                   <select
                     value={adForm.skipAfterSeconds}
                     onChange={(e) => setAdForm({ ...adForm, skipAfterSeconds: Number(e.target.value) })}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-amber-300 font-mono font-bold"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-amber-300 font-mono font-bold text-xs"
                   >
                     <option value={0}>0s (Instant Skip)</option>
                     <option value={3}>3 Seconds</option>
-                    <option value={5}>5 Seconds (Recommended)</option>
+                    <option value={5}>5 Seconds (Default)</option>
                     <option value={7}>7 Seconds</option>
                     <option value={10}>10 Seconds</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sky-400 font-bold mb-1 flex items-center gap-1">
+                  <label className="block text-sky-400 font-bold mb-1 text-xs flex items-center gap-1">
                     <Timer className="w-3 h-3" /> Total Display Time
                   </label>
                   <select
                     value={adForm.displaySeconds}
                     onChange={(e) => setAdForm({ ...adForm, displaySeconds: Number(e.target.value) })}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-sky-300 font-mono font-bold"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-sky-300 font-mono font-bold text-xs"
                   >
                     <option value={5}>5 Seconds</option>
                     <option value={8}>8 Seconds</option>
                     <option value={12}>12 Seconds</option>
+                    <option value={15}>15 Seconds</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-emerald-400 font-bold mb-1 text-xs flex items-center gap-1">
+                    <RefreshCw className="w-3 h-3 text-emerald-400" /> Auto-Rotate Timer
+                  </label>
+                  <select
+                    value={adForm.rotationIntervalSeconds || 5}
+                    onChange={(e) => setAdForm({ ...adForm, rotationIntervalSeconds: Number(e.target.value) })}
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-emerald-300 font-mono font-bold text-xs"
+                  >
+                    <option value={3}>3 Seconds (Fast)</option>
+                    <option value={5}>5 Seconds (Default)</option>
+                    <option value={8}>8 Seconds</option>
+                    <option value={10}>10 Seconds</option>
                     <option value={15}>15 Seconds</option>
                   </select>
                 </div>

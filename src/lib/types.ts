@@ -82,6 +82,7 @@ export interface Advertisement {
   priority?: number;
   displaySeconds: number;     // Total ad display time before auto redirect (e.g. 15s)
   skipAfterSeconds: number;   // Seconds before Close button unlocks (e.g. 5s, 10s)
+  rotationIntervalSeconds?: number; // Auto-rotate interval for banner carousel (e.g. 5s)
   startDate: string;
   endDate: string;
   isActive: boolean;

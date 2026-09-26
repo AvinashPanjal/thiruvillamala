@@ -89,3 +89,20 @@ html, body {
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* REALISTIC MOBILE AD POP-UP SLIDE ANIMATION FROM BOTTOM TO TOP */
+@keyframes slideUpFromBottom {
+  0% {
+    transform: translateY(100%);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slideUpFromBottom 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
