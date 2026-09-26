@@ -244,17 +244,60 @@ function parseTimeValue(timeStr: string): number {
   return hh * 60 + mm;
 }
 
+const TMP_ADS_FILE = '/tmp/thiruvilwamala-ads.json';
+
+function syncDiskAds() {
+  if (typeof window !== 'undefined') return;
+  try {
+    const fs = eval("require('fs')");
+    if (fs.existsSync(TMP_ADS_FILE)) {
+      const data = fs.readFileSync(TMP_ADS_FILE, 'utf-8');
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const idMap = new Map<string, Advertisement>();
+        INITIAL_ADS.forEach(a => idMap.set(a.id, a));
+        parsed.forEach(a => idMap.set(a.id, a));
+        global._thiruvilwamalaAds = Array.from(idMap.values());
+      }
+    }
+  } catch (e) {}
+}
+
+function saveDiskAds() {
+  if (typeof window !== 'undefined') return;
+  try {
+    const fs = eval("require('fs')");
+    if (global._thiruvilwamalaAds) {
+      fs.writeFileSync(TMP_ADS_FILE, JSON.stringify(global._thiruvilwamalaAds, null, 2), 'utf-8');
+    }
+  } catch (e) {}
+}
+
 // --- ADVERTISEMENTS ---
 export async function getAds(placement?: string): Promise<Advertisement[]> {
-  if (!placement) return [...adsStore];
-  return adsStore.filter(ad => ad.placement === placement || ad.placement === 'homepage');
+  syncDiskAds();
+  const currentAds = global._thiruvilwamalaAds || adsStore;
+
+  if (!placement || placement === 'all') {
+    return [...currentAds];
+  }
+
+  return currentAds.filter(ad =>
+    ad.placement === placement ||
+    ad.placement === 'homepage' ||
+    (placement === 'search_results' && (ad.placement === 'native_in_feed' || ad.placement === 'sticky_anchor'))
+  );
 }
 
 export async function getAdById(id: string): Promise<Advertisement | null> {
-  return adsStore.find(ad => ad.id === id) || null;
+  syncDiskAds();
+  const currentAds = global._thiruvilwamalaAds || adsStore;
+  return currentAds.find(ad => ad.id === id) || null;
 }
 
 export async function addAd(ad: Omit<Advertisement, 'id' | 'impressions' | 'clicks' | 'createdAt'>): Promise<Advertisement> {
+  syncDiskAds();
+  const targetStore = global._thiruvilwamalaAds || adsStore;
   const newAd: Advertisement = {
     ...ad,
     id: `ad-${Date.now()}`,
@@ -262,23 +305,33 @@ export async function addAd(ad: Omit<Advertisement, 'id' | 'impressions' | 'clic
     clicks: 0,
     createdAt: new Date().toISOString()
   };
-  adsStore.unshift(newAd);
+  targetStore.unshift(newAd);
+  global._thiruvilwamalaAds = targetStore;
+  saveDiskAds();
   return newAd;
 }
 
 export async function updateAd(id: string, data: Partial<Advertisement>): Promise<Advertisement | null> {
-  const idx = adsStore.findIndex(ad => ad.id === id);
+  syncDiskAds();
+  const targetStore = global._thiruvilwamalaAds || adsStore;
+  const idx = targetStore.findIndex(ad => ad.id === id);
   if (idx !== -1) {
-    adsStore[idx] = { ...adsStore[idx], ...data };
-    return adsStore[idx];
+    targetStore[idx] = { ...targetStore[idx], ...data };
+    global._thiruvilwamalaAds = targetStore;
+    saveDiskAds();
+    return targetStore[idx];
   }
   return null;
 }
 
 export async function deleteAd(id: string): Promise<boolean> {
-  const idx = adsStore.findIndex(ad => ad.id === id);
+  syncDiskAds();
+  const targetStore = global._thiruvilwamalaAds || adsStore;
+  const idx = targetStore.findIndex(ad => ad.id === id);
   if (idx !== -1) {
-    adsStore.splice(idx, 1);
+    targetStore.splice(idx, 1);
+    global._thiruvilwamalaAds = targetStore;
+    saveDiskAds();
     return true;
   }
   return false;
