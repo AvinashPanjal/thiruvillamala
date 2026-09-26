@@ -16,7 +16,26 @@ export const RotatingAdBanner: React.FC<RotatingAdBannerProps> = ({
   defaultIntervalSeconds = 5,
   className = ''
 }) => {
-  const activeAds = ads.filter(a => a && a.isActive);
+  const [allAds, setAllAds] = useState<Advertisement[]>(ads);
+
+  useEffect(() => {
+    let combined = [...ads];
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('thiruvilwamala_custom_ads');
+      if (stored) {
+        try {
+          const customAds: Advertisement[] = JSON.parse(stored);
+          const map = new Map<string, Advertisement>();
+          combined.forEach(a => map.set(a.id, a));
+          customAds.forEach(a => map.set(a.id, a));
+          combined = Array.from(map.values());
+        } catch (e) {}
+      }
+    }
+    setAllAds(combined);
+  }, [ads]);
+
+  const activeAds = allAds.filter(a => a && a.isActive);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [animating, setAnimating] = useState(false);
   const [secondsUntilNext, setSecondsUntilNext] = useState(defaultIntervalSeconds);

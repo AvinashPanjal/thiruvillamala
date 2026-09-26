@@ -9,6 +9,8 @@ import { AdvertisementCard } from '@/components/AdvertisementCard';
 import { FeatureCard, LocalFeatureItem } from '@/components/FeatureCard';
 import { LocalInfoSection } from '@/components/LocalInfoSection';
 import { Sparkles, Shield, Clock, Compass } from 'lucide-react';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export const metadata = {
   title: 'Thiruvilwamala.Live | Local Info & Bus Timetable Platform',

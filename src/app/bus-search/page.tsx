@@ -11,6 +11,8 @@ import { StickyAnchorAd } from '@/components/StickyAnchorAd';
 import { SearchParams } from '@/lib/types';
 import { ArrowLeft, AlertCircle, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 interface BusSearchPageProps {
   searchParams: Promise<SearchParams>;

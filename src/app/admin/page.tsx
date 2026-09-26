@@ -130,24 +130,49 @@ export default function AdminDashboardPage() {
 
   const handleSaveAd = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingAdId) {
-      await updateAd(editingAdId, {
-        ...adForm,
-        displaySeconds: Number(adForm.displaySeconds) || 8,
-        skipAfterSeconds: Number(adForm.skipAfterSeconds) || 5,
-        rotationIntervalSeconds: Number(adForm.rotationIntervalSeconds) || 5
-      });
-    } else {
-      await addAd({
-        ...adForm,
-        displaySeconds: Number(adForm.displaySeconds) || 8,
-        skipAfterSeconds: Number(adForm.skipAfterSeconds) || 5,
-        rotationIntervalSeconds: Number(adForm.rotationIntervalSeconds) || 5
-      });
+    const payload = {
+      ...adForm,
+      displaySeconds: Number(adForm.displaySeconds) || 8,
+      skipAfterSeconds: Number(adForm.skipAfterSeconds) || 5,
+      rotationIntervalSeconds: Number(adForm.rotationIntervalSeconds) || 5
+    };
+
+    try {
+      if (editingAdId) {
+        await fetch('/api/admin/ads', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: editingAdId, ...payload })
+        });
+        await updateAd(editingAdId, payload);
+      } else {
+        const res = await fetch('/api/admin/ads', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!data.success) {
+          await addAd(payload);
+        }
+      }
+    } catch (err) {
+      if (editingAdId) {
+        await updateAd(editingAdId, payload);
+      } else {
+        await addAd(payload);
+      }
     }
+
     setShowAdModal(false);
     resetAdForm();
     await loadData();
+
+    // Sync to localStorage for instant Vercel availability across serverless cold starts
+    const latestAds = await getAds();
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('thiruvilwamala_custom_ads', JSON.stringify(latestAds));
+    }
   };
 
   const [busForm, setBusForm] = useState({
@@ -170,7 +195,22 @@ export default function AdminDashboardPage() {
 
   const loadData = async () => {
     const s = await getAdminStats();
-    const a = await getAds();
+    let a = await getAds();
+
+    // Merge with client-side localStorage fallback for Vercel Serverless environment
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('thiruvilwamala_custom_ads');
+      if (stored) {
+        try {
+          const customAds: Advertisement[] = JSON.parse(stored);
+          const idMap = new Map<string, Advertisement>();
+          a.forEach(ad => idMap.set(ad.id, ad));
+          customAds.forEach(ad => idMap.set(ad.id, ad));
+          a = Array.from(idMap.values());
+        } catch (e) {}
+      }
+    }
+
     const b = await getBuses();
     const r = await getRoutes();
     const st = await getStops();
@@ -219,19 +259,47 @@ export default function AdminDashboardPage() {
   };
 
   const handleToggleAdStatus = async (id: string, currentStatus: boolean) => {
+    await fetch('/api/admin/ads', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, isActive: !currentStatus })
+    }).catch(() => {});
+
     await updateAd(id, { isActive: !currentStatus });
     await loadData();
+
+    const latestAds = await getAds();
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('thiruvilwamala_custom_ads', JSON.stringify(latestAds));
+    }
   };
 
   const handleUpdateAdTiming = async (id: string, field: 'displaySeconds' | 'skipAfterSeconds', val: number) => {
+    await fetch('/api/admin/ads', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, [field]: val })
+    }).catch(() => {});
+
     await updateAd(id, { [field]: val });
     await loadData();
+
+    const latestAds = await getAds();
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('thiruvilwamala_custom_ads', JSON.stringify(latestAds));
+    }
   };
 
   const handleDeleteAd = async (id: string) => {
     if (confirm('Delete this advertisement campaign?')) {
+      await fetch(`/api/admin/ads?id=${id}`, { method: 'DELETE' }).catch(() => {});
       await deleteAd(id);
       await loadData();
+
+      const latestAds = await getAds();
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('thiruvilwamala_custom_ads', JSON.stringify(latestAds));
+      }
     }
   };
 
