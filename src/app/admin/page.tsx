@@ -24,6 +24,9 @@ import {
   Video,
   Upload,
   RefreshCw,
+  Edit3,
+  Filter,
+  Search,
   Image as ImageIcon
 } from 'lucide-react';
 import {
@@ -57,6 +60,8 @@ export default function AdminDashboardPage() {
   const [showBusModal, setShowBusModal] = useState(false);
   const [showTimetableModal, setShowTimetableModal] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [editingAdId, setEditingAdId] = useState<string | null>(null);
+  const [adFilter, setAdFilter] = useState<string>('all');
 
   // New Ad Form State with Full Admin Timing, File Upload & Rotation Control
   const [adForm, setAdForm] = useState({
@@ -77,6 +82,73 @@ export default function AdminDashboardPage() {
     isActive: true,
     badgeText: 'Featured Local Merchant'
   });
+
+  const resetAdForm = () => {
+    setEditingAdId(null);
+    setAdForm({
+      advertiserName: '',
+      title: '',
+      description: '',
+      image: '',
+      mediaType: 'image',
+      videoUrl: '',
+      targetUrl: '',
+      placement: 'interstitial_loading',
+      adFormat: 'interstitial_loading',
+      displaySeconds: 8,
+      skipAfterSeconds: 5,
+      rotationIntervalSeconds: 5,
+      startDate: '2026-01-01',
+      endDate: '2026-12-31',
+      isActive: true,
+      badgeText: 'Featured Local Merchant'
+    });
+  };
+
+  const handleEditAd = (ad: Advertisement) => {
+    setEditingAdId(ad.id);
+    setAdForm({
+      advertiserName: ad.advertiserName || '',
+      title: ad.title || '',
+      description: ad.description || '',
+      image: ad.image || '',
+      mediaType: ad.mediaType || 'image',
+      videoUrl: ad.videoUrl || '',
+      targetUrl: ad.targetUrl || '',
+      placement: ad.placement || 'interstitial_loading',
+      adFormat: ad.adFormat || 'interstitial_loading',
+      displaySeconds: ad.displaySeconds || 8,
+      skipAfterSeconds: ad.skipAfterSeconds ?? 5,
+      rotationIntervalSeconds: ad.rotationIntervalSeconds || 5,
+      startDate: ad.startDate || '2026-01-01',
+      endDate: ad.endDate || '2026-12-31',
+      isActive: ad.isActive ?? true,
+      badgeText: ad.badgeText || 'Featured Local Merchant'
+    });
+    setShowAdModal(true);
+  };
+
+  const handleSaveAd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingAdId) {
+      await updateAd(editingAdId, {
+        ...adForm,
+        displaySeconds: Number(adForm.displaySeconds) || 8,
+        skipAfterSeconds: Number(adForm.skipAfterSeconds) || 5,
+        rotationIntervalSeconds: Number(adForm.rotationIntervalSeconds) || 5
+      });
+    } else {
+      await addAd({
+        ...adForm,
+        displaySeconds: Number(adForm.displaySeconds) || 8,
+        skipAfterSeconds: Number(adForm.skipAfterSeconds) || 5,
+        rotationIntervalSeconds: Number(adForm.rotationIntervalSeconds) || 5
+      });
+    }
+    setShowAdModal(false);
+    resetAdForm();
+    await loadData();
+  };
 
   const [busForm, setBusForm] = useState({
     name: '',
@@ -115,35 +187,6 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     loadData();
   }, []);
-
-  const handleCreateAd = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await addAd({
-      ...adForm,
-      displaySeconds: Number(adForm.displaySeconds) || 8,
-      skipAfterSeconds: Number(adForm.skipAfterSeconds) || 5
-    });
-    setShowAdModal(false);
-    setAdForm({
-      advertiserName: '',
-      title: '',
-      description: '',
-      image: '',
-      mediaType: 'image',
-      videoUrl: '',
-      targetUrl: '',
-      placement: 'interstitial_loading',
-      adFormat: 'interstitial_loading',
-      displaySeconds: 8,
-      skipAfterSeconds: 5,
-      rotationIntervalSeconds: 5,
-      startDate: '2026-01-01',
-      endDate: '2026-12-31',
-      isActive: true,
-      badgeText: 'Featured Local Merchant'
-    });
-    await loadData();
-  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -246,33 +289,34 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      <header className="sticky top-0 z-40 bg-slate-900 border-b border-slate-800 px-4 sm:px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans pb-12">
+      {/* MOBILE-FIRST HEADER */}
+      <header className="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black group-hover:scale-105 transition-transform">
               <Bus className="w-4 h-4" />
             </div>
-            <span className="text-base font-extrabold text-white tracking-tight">
-              Thiruvilwamala<span className="text-blue-400"> Admin Control</span>
+            <span className="text-sm sm:text-base font-extrabold text-white tracking-tight">
+              Thiruvilwamala<span className="text-blue-400"> Admin Desk</span>
             </span>
           </Link>
-          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-400/10 text-amber-300 border border-amber-400/30">
-            Ad Timing &amp; Video Media Desk
+          <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-amber-400/10 text-amber-300 border border-amber-400/30">
+            Ad Timing &amp; Media Desk
           </span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Link
             href="/"
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 transition-colors flex items-center gap-1.5"
+            className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 transition-colors flex items-center gap-1"
           >
-            <span>View Live Website</span>
+            <span>Live Site</span>
             <ArrowUpRight className="w-3.5 h-3.5" />
           </Link>
           <Link
             href="/admin/login"
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-300 bg-rose-950/40 hover:bg-rose-950/80 border border-rose-500/30 transition-colors flex items-center gap-1.5"
+            className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-300 bg-rose-950/40 hover:bg-rose-950/80 border border-rose-500/30 transition-colors flex items-center gap-1"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Logout</span>
@@ -280,8 +324,72 @@ export default function AdminDashboardPage() {
         </div>
       </header>
 
-      <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <aside className="lg:col-span-3 space-y-2">
+      {/* MOBILE HORIZONTAL TAB NAV BAR (Scrollable on small screens) */}
+      <div className="bg-slate-900/80 border-b border-slate-800 px-3 py-2 sticky top-[49px] z-30 overflow-x-auto no-scrollbar flex items-center gap-2 snap-x">
+        <button
+          onClick={() => setActiveTab('analytics')}
+          className={`px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 shrink-0 transition-all snap-start ${
+            activeTab === 'analytics'
+              ? 'bg-blue-600 text-white shadow-md'
+              : 'bg-slate-800 text-slate-300 hover:text-white'
+          }`}
+        >
+          <BarChart3 className="w-3.5 h-3.5" />
+          <span>Analytics</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('ads')}
+          className={`px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 shrink-0 transition-all snap-start ${
+            activeTab === 'ads'
+              ? 'bg-blue-600 text-white shadow-md'
+              : 'bg-slate-800 text-slate-300 hover:text-white'
+          }`}
+        >
+          <Megaphone className="w-3.5 h-3.5 text-amber-400" />
+          <span>Ads &amp; Campaigns ({adsList.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('buses')}
+          className={`px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 shrink-0 transition-all snap-start ${
+            activeTab === 'buses'
+              ? 'bg-blue-600 text-white shadow-md'
+              : 'bg-slate-800 text-slate-300 hover:text-white'
+          }`}
+        >
+          <Bus className="w-3.5 h-3.5" />
+          <span>Buses ({busesList.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('routes')}
+          className={`px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 shrink-0 transition-all snap-start ${
+            activeTab === 'routes'
+              ? 'bg-blue-600 text-white shadow-md'
+              : 'bg-slate-800 text-slate-300 hover:text-white'
+          }`}
+        >
+          <RouteIcon className="w-3.5 h-3.5" />
+          <span>Routes ({routesList.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('timetables')}
+          className={`px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 shrink-0 transition-all snap-start ${
+            activeTab === 'timetables'
+              ? 'bg-blue-600 text-white shadow-md'
+              : 'bg-slate-800 text-slate-300 hover:text-white'
+          }`}
+        >
+          <Clock className="w-3.5 h-3.5" />
+          <span>Timetables ({timetablesList.length})</span>
+        </button>
+      </div>
+
+      <div className="flex-1 max-w-7xl mx-auto w-full px-3 sm:px-6 py-4 lg:py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* DESKTOP SIDEBAR (hidden on mobile since horizontal tab bar is used above) */}
+        <aside className="hidden lg:block lg:col-span-3 space-y-2">
           <div className="bg-slate-900 rounded-2xl border border-slate-800 p-3 space-y-1">
             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3 py-1">
               Admin Control Modules
@@ -311,7 +419,7 @@ export default function AdminDashboardPage() {
             >
               <div className="flex items-center gap-2">
                 <Megaphone className="w-4 h-4" />
-                <span>Full-Screen Ad Timings ({adsList.length})</span>
+                <span>Ads &amp; Campaigns ({adsList.length})</span>
               </div>
             </button>
 
@@ -339,7 +447,7 @@ export default function AdminDashboardPage() {
             >
               <div className="flex items-center gap-2">
                 <RouteIcon className="w-4 h-4" />
-                <span>Routes ({routesList.length}) &amp; Stops ({stopsList.length})</span>
+                <span>Routes &amp; Stops</span>
               </div>
             </button>
 
@@ -409,104 +517,188 @@ export default function AdminDashboardPage() {
 
           {activeTab === 'ads' && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-extrabold text-white">Full-Screen Ad Timings &amp; Video Media Controls</h2>
-                  <p className="text-xs text-slate-400">Set mandatory skip lock timers (e.g. 5s) and video poster media</p>
+                  <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
+                    <Megaphone className="w-5 h-5 text-amber-400" />
+                    <span>Ad Campaigns &amp; Search Banner Controls</span>
+                  </h2>
+                  <p className="text-xs text-slate-400">Manage, edit, or upload video/poster banners for Search Results &amp; Interstitials</p>
                 </div>
 
                 <button
-                  onClick={() => setShowAdModal(true)}
-                  className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md cursor-pointer"
+                  onClick={() => {
+                    resetAdForm();
+                    setShowAdModal(true);
+                  }}
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Create Ad Campaign</span>
+                  <span>Create New Ad Campaign</span>
                 </button>
               </div>
 
+              {/* PLACEMENT FILTER TABS */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-xs">
+                <span className="text-[11px] font-bold text-slate-500 uppercase flex items-center gap-1 shrink-0">
+                  <Filter className="w-3.5 h-3.5 text-blue-400" /> Filter:
+                </span>
+                {[
+                  { id: 'all', label: 'All Placements' },
+                  { id: 'search_results', label: '🔍 Search Results Banners' },
+                  { id: 'interstitial_loading', label: '🎬 Full-Screen Search Ads' },
+                  { id: 'native_in_feed', label: '📰 Native In-Feed Search' },
+                  { id: 'sticky_anchor', label: '📌 Sticky Bottom Anchor' },
+                  { id: 'homepage', label: '🏠 Homepage Banners' }
+                ].map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => setAdFilter(f.id)}
+                    className={`px-3 py-1 rounded-xl font-bold transition-all shrink-0 cursor-pointer ${
+                      adFilter === f.id
+                        ? 'bg-blue-600 text-white shadow-xs'
+                        : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* AD CAMPAIGNS TABLE (Desktop View) & CARDS (Mobile View) */}
               <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-                <div className="overflow-x-auto">
+                {/* Desktop Table View */}
+                <div className="hidden sm:block overflow-x-auto">
                   <table className="w-full text-left text-xs text-slate-300">
                     <thead className="bg-slate-950 text-slate-400 font-bold border-b border-slate-800 uppercase tracking-wider">
                       <tr>
-                        <th className="p-3.5">Advertiser &amp; Title</th>
+                        <th className="p-3.5">Advertiser &amp; Campaign</th>
+                        <th className="p-3.5">Placement Location</th>
                         <th className="p-3.5">Format &amp; Media</th>
-                        <th className="p-3.5">Skip Lock Timer</th>
-                        <th className="p-3.5">Total Display Time</th>
+                        <th className="p-3.5">Skip Lock</th>
+                        <th className="p-3.5">Auto-Rotate</th>
                         <th className="p-3.5">Status</th>
                         <th className="p-3.5 text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/60">
-                      {adsList.map((ad) => (
-                        <tr key={ad.id} className="hover:bg-slate-800/50 transition-colors">
-                          <td className="p-3.5">
-                            <div className="font-bold text-white">{ad.title}</div>
-                            <div className="text-[11px] text-blue-400">{ad.advertiserName}</div>
-                          </td>
-                          <td className="p-3.5 font-mono text-[11px]">
-                            <span className="px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-amber-300 font-bold uppercase">
-                              {ad.placement}
-                            </span>
-                            <div className="text-[10px] text-slate-400 mt-0.5 capitalize">{ad.mediaType || 'image'} format</div>
-                          </td>
-                          <td className="p-3.5">
-                            <div className="flex items-center gap-1.5">
-                              <Lock className="w-3.5 h-3.5 text-amber-400" />
-                              <select
-                                value={ad.skipAfterSeconds ?? 5}
-                                onChange={(e) => handleUpdateAdTiming(ad.id, 'skipAfterSeconds', Number(e.target.value))}
-                                className="bg-slate-950 border border-slate-700 text-amber-300 rounded px-2 py-1 text-xs font-mono font-bold"
+                      {adsList
+                        .filter(ad => adFilter === 'all' || ad.placement === adFilter)
+                        .map((ad) => (
+                          <tr key={ad.id} className="hover:bg-slate-800/50 transition-colors">
+                            <td className="p-3.5">
+                              <div className="font-extrabold text-white text-sm">{ad.title}</div>
+                              <div className="text-[11px] text-blue-400 font-semibold">{ad.advertiserName}</div>
+                              <div className="text-[10px] text-slate-500 truncate max-w-xs">{ad.description}</div>
+                            </td>
+                            <td className="p-3.5">
+                              <span className="px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800 font-mono font-bold text-[10px] uppercase">
+                                {ad.placement}
+                              </span>
+                            </td>
+                            <td className="p-3.5 font-mono text-[11px]">
+                              <span className="text-amber-300 font-bold capitalize">{ad.mediaType || 'image'}</span>
+                              <div className="text-[10px] text-slate-400">Target: {ad.targetUrl ? 'URL Set' : 'None'}</div>
+                            </td>
+                            <td className="p-3.5 font-mono font-bold text-amber-400">
+                              {ad.skipAfterSeconds ?? 5}s
+                            </td>
+                            <td className="p-3.5 font-mono font-bold text-emerald-400">
+                              {ad.rotationIntervalSeconds ?? 5}s
+                            </td>
+                            <td className="p-3.5">
+                              <button
+                                onClick={() => handleToggleAdStatus(ad.id, ad.isActive)}
+                                className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold flex items-center gap-1 cursor-pointer ${
+                                  ad.isActive
+                                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                                    : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                                }`}
                               >
-                                <option value={0}>Instant (0s)</option>
-                                <option value={3}>Skip after 3s</option>
-                                <option value={5}>Skip after 5s (Recommended)</option>
-                                <option value={7}>Skip after 7s</option>
-                                <option value={10}>Skip after 10s</option>
-                              </select>
-                            </div>
-                          </td>
-                          <td className="p-3.5">
-                            <div className="flex items-center gap-1.5">
-                              <Timer className="w-3.5 h-3.5 text-sky-400" />
-                              <select
-                                value={ad.displaySeconds || 8}
-                                onChange={(e) => handleUpdateAdTiming(ad.id, 'displaySeconds', Number(e.target.value))}
-                                className="bg-slate-950 border border-slate-700 text-sky-300 rounded px-2 py-1 text-xs font-mono font-bold"
+                                {ad.isActive ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                                {ad.isActive ? 'Active' : 'Inactive'}
+                              </button>
+                            </td>
+                            <td className="p-3.5 text-right space-x-2">
+                              <button
+                                onClick={() => handleEditAd(ad)}
+                                className="px-2.5 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/40 transition-all text-xs font-bold inline-flex items-center gap-1 cursor-pointer"
+                                title="Edit Campaign"
                               >
-                                <option value={5}>5 Seconds</option>
-                                <option value={8}>8 Seconds</option>
-                                <option value={12}>12 Seconds</option>
-                                <option value={15}>15 Seconds</option>
-                              </select>
-                            </div>
-                          </td>
-                          <td className="p-3.5">
-                            <button
-                              onClick={() => handleToggleAdStatus(ad.id, ad.isActive)}
-                              className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold flex items-center gap-1 cursor-pointer ${
-                                ad.isActive
-                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                                  : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                              }`}
-                            >
-                              {ad.isActive ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                              {ad.isActive ? 'Active' : 'Inactive'}
-                            </button>
-                          </td>
-                          <td className="p-3.5 text-right">
-                            <button
-                              onClick={() => handleDeleteAd(ad.id)}
-                              className="p-1.5 rounded-lg bg-rose-950/60 text-rose-400 hover:bg-rose-900 hover:text-white transition-colors cursor-pointer"
-                              title="Delete Ad"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
+                                <Edit3 className="w-3.5 h-3.5" />
+                                <span>Edit</span>
+                              </button>
+                              <button
+                                onClick={() => handleDeleteAd(ad.id)}
+                                className="p-1.5 rounded-lg bg-rose-950/60 text-rose-400 hover:bg-rose-900 hover:text-white transition-colors inline-flex items-center cursor-pointer"
+                                title="Delete Campaign"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
+                </div>
+
+                {/* Mobile Responsive Cards View (sm:hidden) */}
+                <div className="block sm:hidden divide-y divide-slate-800">
+                  {adsList
+                    .filter(ad => adFilter === 'all' || ad.placement === adFilter)
+                    .map((ad) => (
+                      <div key={ad.id} className="p-4 space-y-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <span className="px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800 font-mono font-bold text-[9px] uppercase">
+                              {ad.placement}
+                            </span>
+                            <h4 className="font-extrabold text-white text-sm mt-1">{ad.title}</h4>
+                            <p className="text-xs text-blue-400 font-semibold">{ad.advertiserName}</p>
+                          </div>
+
+                          <button
+                            onClick={() => handleToggleAdStatus(ad.id, ad.isActive)}
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold shrink-0 ${
+                              ad.isActive
+                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                                : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                            }`}
+                          >
+                            {ad.isActive ? 'Active' : 'Inactive'}
+                          </button>
+                        </div>
+
+                        <p className="text-xs text-slate-400 line-clamp-2">{ad.description}</p>
+
+                        <div className="grid grid-cols-2 gap-2 text-[11px] font-mono bg-slate-950 p-2 rounded-xl border border-slate-800">
+                          <div>
+                            <span className="text-slate-500 block text-[9px] uppercase">Skip Lock</span>
+                            <span className="text-amber-400 font-bold">{ad.skipAfterSeconds ?? 5}s</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-500 block text-[9px] uppercase">Auto-Rotate</span>
+                            <span className="text-emerald-400 font-bold">{ad.rotationIntervalSeconds ?? 5}s</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-2 pt-1">
+                          <button
+                            onClick={() => handleEditAd(ad)}
+                            className="flex-1 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-xs"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                            <span>Edit Campaign</span>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteAd(ad.id)}
+                            className="px-3 py-2 rounded-xl bg-rose-950/60 text-rose-400 hover:bg-rose-900 hover:text-white border border-rose-500/30 font-bold text-xs"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                 </div>
               </div>
             </div>
@@ -658,11 +850,13 @@ export default function AdminDashboardPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
           <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-bold text-white">Create Ad Campaign</h3>
-              <button onClick={() => setShowAdModal(false)} className="text-slate-400 hover:text-white">✕</button>
+              <h3 className="text-lg font-bold text-white">
+                {editingAdId ? '✏️ Edit Ad Campaign' : '➕ Create New Ad Campaign'}
+              </h3>
+              <button onClick={() => setShowAdModal(false)} className="text-slate-400 hover:text-white cursor-pointer text-base">✕</button>
             </div>
 
-            <form onSubmit={handleCreateAd} className="space-y-3 text-xs">
+            <form onSubmit={handleSaveAd} className="space-y-3 text-xs">
               <div>
                 <label className="block text-slate-400 font-bold mb-1">Advertiser Name</label>
                 <input
